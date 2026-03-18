@@ -15,5 +15,10 @@ namespace generic_repo_uow_pattern_api.Repository
         Task CommitAsync();
 
         Task RollbackAsync();
+
+
+        TRepository GetRepository<TRepository, TEntity>()
+            where TRepository : class
+            where TEntity : class;
     }
 }

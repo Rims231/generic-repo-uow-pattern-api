@@ -1,4 +1,5 @@
-﻿using NPOI.SS.Formula.Functions;
+﻿using generic_repo_uow_pattern_api.Data;
+using NPOI.SS.Formula.Functions;
 
 namespace generic_repo_uow_pattern_api.Repository
 {
@@ -13,5 +14,8 @@ namespace generic_repo_uow_pattern_api.Repository
         Task<T> AddAsync(T entity);
         Task<T> UpdateAsync(T entity);
         Task<T> DeleteAsync(int id);
+
+
+        void SetDbContext(MyDbContext dbContext);
     }
 }

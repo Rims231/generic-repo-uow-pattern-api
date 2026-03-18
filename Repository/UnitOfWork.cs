@@ -7,28 +7,27 @@ namespace generic_repo_uow_pattern_api.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly MyDbContext _myDbContext;
+        private readonly IServiceProvider _serviceProvider;
         private IDbContextTransaction _transaction;
         private readonly Dictionary<Type, object> _repositories = new Dictionary<Type, object>();
 
-        public IProductRepository ProductRepository {  get;  }
-        public UnitOfWork(MyDbContext myDbContext)
+        public IProductRepository ProductRepository { get; }
+        public UnitOfWork(MyDbContext myDbContext, IServiceProvider serviceProvider)
         {
             _myDbContext = myDbContext;
+            _serviceProvider = serviceProvider;
             _repositories = new Dictionary<Type, object>();
             ProductRepository = new ProductRepository(_myDbContext);
         }
 
-        //public async Task BeginTransactionAsync()
-        //{
-        //    var transaction = _myDbContext.Database.BeginTransactionAsync();
-        //}
+
 
         public async Task BeginTransactionAsync()
         {
-            _transaction = await _myDbContext.Database.BeginTransactionAsync(); // ✅
+            _transaction = await _myDbContext.Database.BeginTransactionAsync();
         }
 
-     
+
 
         private bool _disposed = false;
 
@@ -45,11 +44,10 @@ namespace generic_repo_uow_pattern_api.Repository
 
             if (disposing)
             {
-                // Dispose managed resources
+
                 _myDbContext?.Dispose();
             }
 
-            // Free unmanaged resources here if any
 
             _disposed = true;
         }
@@ -69,7 +67,7 @@ namespace generic_repo_uow_pattern_api.Repository
 
         public async Task RollbackAsync()
         {
-            if (_transaction == null) return; // ✅ guard against null
+            if (_transaction == null) return;
 
             await _transaction.RollbackAsync();
             await _transaction.DisposeAsync();
@@ -101,5 +99,29 @@ namespace generic_repo_uow_pattern_api.Repository
         {
             return await _myDbContext.SaveChangesAsync();
         }
+
+
+        TRepository IUnitOfWork.GetRepository<TRepository, TEntity>()
+    where TRepository : class
+    where TEntity : class
+        {
+            var repository = _serviceProvider.GetService<TRepository>();
+            if (repository == null)
+            {
+                throw new InvalidOperationException($"Repository of type {typeof(TRepository).Name} is not registered.");
+            }
+
+            if (repository is IRepository<TEntity> genericRepository)
+            {
+                genericRepository.SetDbContext(_myDbContext);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Repository of type {typeof(TRepository).Name} does not implement IRepository<{typeof(TEntity).Name}>.");
+            }
+
+            return repository;
+        }
+
     }
 }

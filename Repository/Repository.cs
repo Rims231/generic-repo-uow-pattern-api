@@ -8,7 +8,7 @@ namespace generic_repo_uow_pattern_api.Repository
 
     public class Repository<T> : IRepository<T> where T : class
     {
-        private readonly MyDbContext _myDbContext;
+        private  MyDbContext _myDbContext;
         protected readonly DbSet<T> _dbSet;
 
         public Repository(MyDbContext myDbContext)
@@ -55,6 +55,12 @@ namespace generic_repo_uow_pattern_api.Repository
             await _myDbContext.SaveChangesAsync();
 
             return entity;
+        }
+
+        public void SetDbContext(MyDbContext dbContext)
+        {
+            _myDbContext= dbContext;
+            
         }
     }
 
