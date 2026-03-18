@@ -1,4 +1,5 @@
-﻿using generic_repo_uow_pattern_api.Data;
+﻿using generic_repo_uow_pattern_api.Common;
+using generic_repo_uow_pattern_api.Data;
 using generic_repo_uow_pattern_api.Entity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,8 +18,17 @@ namespace generic_repo_uow_pattern_api.Repository
 
         }
 
-      
 
-        
+        public async Task<PaginatedList<Product>> GetProductsByPaging(decimal minPrice, int pageNumber, int pageSize, string searchTerm)
+        {
+            IQueryable<Product> query = _dbSet.Where(p => p.Price >= minPrice);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(p => EF.Functions.Like(p.ProductName, $"%{searchTerm}%"));
+            }
+
+            return await PaginatedList<Product>.ToPageList(query, pageNumber, pageSize);
+        }
     }
 }

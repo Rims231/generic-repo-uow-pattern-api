@@ -28,7 +28,27 @@ namespace generic_repo_uow_pattern_api.Controllers
         }
 
 
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetProductsByPaging(
+      [FromQuery] decimal minPrice = 0,
+      [FromQuery] int pageNumber = 1,
+      [FromQuery] int pageSize = 10,
+      [FromQuery] string searchTerm = "")
+        {
+            var result = await _unitOfWork.ProductRepository.GetProductsByPaging(minPrice, pageNumber, pageSize, searchTerm);
 
+            var metadata = new
+            {
+                result.TotalCount,
+                result.PageSize,
+                result.CurrentPage,
+                result.TotalPages,
+                result.HasNext,
+                result.HasPrevious
+            };
+
+            return Ok(new { data = result, pagination = metadata });
+        }
 
         [HttpGet("ProductByName")]
         public async Task<IActionResult> GetByName(string productName)
