@@ -1,8 +1,8 @@
 using AutoMapper;
 using generic_repo_uow_pattern_api.CustomHealthCheck;
 using generic_repo_uow_pattern_api.Data;
+using generic_repo_uow_pattern_api.Exceptions;
 using generic_repo_uow_pattern_api.MapperProfile;
-
 using generic_repo_uow_pattern_api.Repository;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -10,6 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddExceptionHandler<NotImplementedExceptionHandler>();
+builder.Services.AddExceptionHandler<TimeoutExceptionHandler>();
+builder.Services.AddExceptionHandler<DefaultException>(); // always last
+builder.Services.AddProblemDetails();
 
 // Health Checks
 builder.Services.AddHttpClient<ApiHealthCheck>();
@@ -33,17 +38,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//var mapperConfiguration = new MapperConfiguration(cfg =>
-//{
-//    cfg.AddProfile(new MappingProfile("DefaultConnection"));
-//});
-
-//IMapper mapper = mapperConfiguration.CreateMapper();
-
-// Program.cs
 builder.Services.AddAutoMapper(typeof(YourMappingProfile));
-
-
 
 // Controllers & Swagger
 builder.Services.AddControllers();
@@ -52,13 +47,16 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseExceptionHandler(); // must be first
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    // removed UseDeveloperExceptionPage()
 }
 
-// DB only — safe for internal/infra monitoring (no self-referencing loop)
+// DB only
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("db"),
@@ -71,7 +69,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     }
 });
 
-// All checks — intended for external monitoring tools only
+// All checks
 app.MapHealthChecks("/health/full", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
@@ -88,8 +86,6 @@ app.MapHealthChecksUI(options =>
     options.UIPath = "/health-ui";
     options.ApiPath = "/health-ui-api";
 });
-
-app.UseDeveloperExceptionPage();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
