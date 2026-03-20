@@ -1,5 +1,8 @@
+using AutoMapper;
 using generic_repo_uow_pattern_api.CustomHealthCheck;
 using generic_repo_uow_pattern_api.Data;
+using generic_repo_uow_pattern_api.MapperProfile;
+
 using generic_repo_uow_pattern_api.Repository;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -29,6 +32,18 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Database
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//var mapperConfiguration = new MapperConfiguration(cfg =>
+//{
+//    cfg.AddProfile(new MappingProfile("DefaultConnection"));
+//});
+
+//IMapper mapper = mapperConfiguration.CreateMapper();
+
+// Program.cs
+builder.Services.AddAutoMapper(typeof(YourMappingProfile));
+
+
 
 // Controllers & Swagger
 builder.Services.AddControllers();
@@ -73,6 +88,8 @@ app.MapHealthChecksUI(options =>
     options.UIPath = "/health-ui";
     options.ApiPath = "/health-ui-api";
 });
+
+app.UseDeveloperExceptionPage();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
