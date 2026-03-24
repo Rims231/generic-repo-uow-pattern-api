@@ -1,4 +1,5 @@
 ﻿using generic_repo_uow_pattern_api.Data;
+using generic_repo_uow_pattern_api.Specification;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -105,6 +106,26 @@ namespace generic_repo_uow_pattern_api.Repository
             query = ascending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
             return await query.ToListAsync();
         }
+
+        // ── Specification-based queries ───────────────────────────────────────
+
+        /// <summary>Returns all entities satisfying the specification.</summary>
+        public async Task<IEnumerable<T>> GetWithSpecAsync(ISpecification<T> spec)
+            => await SpecificationEvaluator<T>
+                .GetQuery(_dbSet.AsQueryable(), spec)
+                .ToListAsync();
+
+        /// <summary>Returns the single entity satisfying the specification, or null.</summary>
+        public async Task<T?> GetEntityWithSpecAsync(ISpecification<T> spec)
+            => await SpecificationEvaluator<T>
+                .GetQuery(_dbSet.AsQueryable(), spec)
+                .FirstOrDefaultAsync();
+
+        /// <summary>Returns the count of entities satisfying the specification.</summary>
+        public async Task<int> CountWithSpecAsync(ISpecification<T> spec)
+            => await SpecificationEvaluator<T>
+                .GetQuery(_dbSet.AsQueryable(), spec)
+                .CountAsync();
 
         // ── Infrastructure ────────────────────────────────────────────────────
 

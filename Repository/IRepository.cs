@@ -11,7 +11,7 @@ namespace generic_repo_uow_pattern_api.Repository
         Task<T> UpdateAsync(T entity);
         Task<T> DeleteAsync(int id);
 
-        // Expression-based methods
+        // ── Expression-based ──────────────────────────────────────────────────
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
@@ -22,6 +22,11 @@ namespace generic_repo_uow_pattern_api.Repository
             Expression<Func<T, bool>>? predicate,
             Expression<Func<T, TKey>> orderBy,
             bool ascending = true);
+
+        // ── Specification-based ───────────────────────────────────────────────
+        Task<IEnumerable<T>> GetWithSpecAsync(ISpecification<T> spec);
+        Task<T?> GetEntityWithSpecAsync(ISpecification<T> spec);
+        Task<int> CountWithSpecAsync(ISpecification<T> spec);
 
         void SetDbContext(MyDbContext dbContext);
     }
