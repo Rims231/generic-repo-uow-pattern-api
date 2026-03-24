@@ -5,7 +5,7 @@ namespace generic_repo_uow_pattern_api.Specification
 {
     public abstract class BaseSpecification<T> : ISpecification<T> where T : class
     {
-        // ── ISpecification<T> properties ─────────────────────────────────────
+
 
         public Expression<Func<T, bool>>? Criteria { get; private set; }
         public List<Expression<Func<T, object>>> Includes { get; } = new();
@@ -15,7 +15,7 @@ namespace generic_repo_uow_pattern_api.Specification
         public int? Skip { get; private set; }
         public bool IsPagingEnabled { get; private set; }
 
-        // ── Protected fluent builders (called from derived specs) ─────────────
+
 
         protected void AddCriteria(Expression<Func<T, bool>> criteria)
             => Criteria = criteria;

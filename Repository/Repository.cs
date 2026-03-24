@@ -16,7 +16,7 @@ namespace generic_repo_uow_pattern_api.Repository
             _myDbContext = myDbContext;
         }
 
-        // ── Basic CRUD ────────────────────────────────────────────────────────
+    
 
         public async Task<T> AddAsync(T entity)
         {
@@ -49,33 +49,23 @@ namespace generic_repo_uow_pattern_api.Repository
             return entity;
         }
 
-        // ── Expression-based queries ──────────────────────────────────────────
-
-        /// <summary>Returns all entities matching the given predicate.</summary>
+ 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.Where(predicate).ToListAsync();
 
-        /// <summary>Returns the first entity matching the predicate, or null.</summary>
         public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.FirstOrDefaultAsync(predicate);
 
-        /// <summary>Returns true if any entity satisfies the predicate.</summary>
+      
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
             => await _dbSet.AnyAsync(predicate);
 
-        /// <summary>
-        /// Returns the total count of entities.
-        /// When a predicate is provided, counts only matching entities.
-        /// </summary>
         public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
             => predicate is null
                 ? await _dbSet.CountAsync()
                 : await _dbSet.CountAsync(predicate);
 
-        /// <summary>
-        /// Returns a paged result set. Optionally filters by predicate before paging.
-        /// pageNumber is 1-based.
-        /// </summary>
+     
         public async Task<IEnumerable<T>> GetPagedAsync(
             Expression<Func<T, bool>>? predicate,
             int pageNumber,
@@ -88,15 +78,12 @@ namespace generic_repo_uow_pattern_api.Repository
                 .ToListAsync();
         }
 
-        /// <summary>Projects all entities using the given selector expression.</summary>
+    
         public async Task<IEnumerable<TResult>> SelectAsync<TResult>(
             Expression<Func<T, TResult>> selector)
             => await _dbSet.Select(selector).ToListAsync();
 
-        /// <summary>
-        /// Returns entities filtered by an optional predicate and ordered
-        /// by the given key selector, ascending or descending.
-        /// </summary>
+     
         public async Task<IEnumerable<T>> FindWithOrderAsync<TKey>(
             Expression<Func<T, bool>>? predicate,
             Expression<Func<T, TKey>> orderBy,
@@ -107,27 +94,22 @@ namespace generic_repo_uow_pattern_api.Repository
             return await query.ToListAsync();
         }
 
-        // ── Specification-based queries ───────────────────────────────────────
-
-        /// <summary>Returns all entities satisfying the specification.</summary>
         public async Task<IEnumerable<T>> GetWithSpecAsync(ISpecification<T> spec)
             => await SpecificationEvaluator<T>
                 .GetQuery(_dbSet.AsQueryable(), spec)
                 .ToListAsync();
 
-        /// <summary>Returns the single entity satisfying the specification, or null.</summary>
         public async Task<T?> GetEntityWithSpecAsync(ISpecification<T> spec)
             => await SpecificationEvaluator<T>
                 .GetQuery(_dbSet.AsQueryable(), spec)
                 .FirstOrDefaultAsync();
 
-        /// <summary>Returns the count of entities satisfying the specification.</summary>
+     
         public async Task<int> CountWithSpecAsync(ISpecification<T> spec)
             => await SpecificationEvaluator<T>
                 .GetQuery(_dbSet.AsQueryable(), spec)
                 .CountAsync();
 
-        // ── Infrastructure ────────────────────────────────────────────────────
 
         public void SetDbContext(MyDbContext dbContext)
         {
